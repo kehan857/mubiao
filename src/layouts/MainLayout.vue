@@ -6,7 +6,15 @@
       :trigger="null" 
       collapsible 
       width="256"
-      :style="{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0 }"
+      :style="{ 
+        overflow: 'auto', 
+        height: '100vh', 
+        position: 'fixed', 
+        left: 0, 
+        top: 0, 
+        bottom: 0,
+        zIndex: 100
+      }"
     >
       <!-- Logo区域 -->
       <div class="logo">
@@ -22,6 +30,7 @@
         v-model:openKeys="openKeys"
         :items="menuItems"
         @click="handleMenuClick"
+        class="side-menu"
       />
     </a-layout-sider>
 
@@ -83,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, h, watch } from 'vue'
+import { ref, h, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   DashboardOutlined,
@@ -248,6 +257,10 @@ const menuItems = [
 </script>
 
 <style scoped>
+.main-layout {
+  min-height: 100vh;
+}
+
 .logo {
   height: 64px;
   padding: 16px;
@@ -259,28 +272,90 @@ const menuItems = [
   position: relative;
 }
 
-.header-content {
-  height: 64px;
-  padding: 0 24px;
+.logo img {
+  height: 32px;
+  width: auto;
+}
+
+.side-menu {
+  border-right: 0;
+  background: #001529;
+}
+
+.side-menu :deep(.ant-menu-item) {
+  margin: 0;
+  height: 40px;
+  line-height: 40px;
+  width: calc(100% - 0px);
+  overflow: hidden;
+}
+
+.side-menu :deep(.ant-menu-submenu) {
+  background: #001529;
+}
+
+.side-menu :deep(.ant-menu-submenu-title) {
+  height: 40px;
+  line-height: 40px;
+  margin: 0;
+  width: calc(100% - 0px);
+  overflow: hidden;
+}
+
+.side-menu :deep(.ant-menu-item-selected) {
+  background-color: #1890ff !important;
+}
+
+.side-menu :deep(.ant-menu-submenu-selected .ant-menu-submenu-title) {
+  color: #1890ff;
+}
+
+.header {
+  padding: 0;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 24px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 256px;
+  z-index: 99;
+  transition: left 0.2s;
 }
 
 .header-left {
   display: flex;
   align-items: center;
+  gap: 16px;
 }
 
 .header-right {
   display: flex;
   align-items: center;
+  gap: 16px;
+}
+
+.trigger {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #1890ff;
+}
+
+.notification {
+  margin-right: 16px;
 }
 
 .user-info {
-  display: flex;
-  align-items: center;
-  height: 64px;
+  cursor: pointer;
   padding: 0 12px;
   border-radius: 6px;
   transition: all 0.3s ease;
@@ -292,9 +367,25 @@ const menuItems = [
 }
 
 .content {
-  margin: 16px;
+  margin-top: 64px;
+  margin-left: 0;
+  margin-right: 16px;
+  margin-bottom: 16px;
   padding: 24px;
   background: #fff;
   border-radius: 8px;
+  min-height: calc(100vh - 96px);
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .header {
+    left: 80px;
+  }
+  
+  .content {
+    margin: 80px 8px 8px 8px;
+    padding: 16px;
+  }
 }
 </style> 
