@@ -400,7 +400,7 @@ const addNewSummary = () => {
   const newId = Math.max(...summaries.value.map(item => item.id)) + 1
   const newSummary = {
     id: newId,
-    year: currentYear.value,
+    year: parseInt(currentYear.value),
     quarter: currentQuarter.value,
     serialNumber: summaries.value.length + 1,
     weight: 0,

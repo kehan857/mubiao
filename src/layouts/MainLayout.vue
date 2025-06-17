@@ -204,14 +204,6 @@ const menuItems = [
     ]
   },
   {
-    key: 'templates',
-    icon: h(BookOutlined),
-    label: '模板管理',
-    children: [
-      { key: 'templates/management', label: '模板管理' }
-    ]
-  },
-  {
     key: 'audit',
     icon: h(AuditOutlined),
     label: '审核管理',
@@ -231,6 +223,14 @@ const menuItems = [
     children: [
       { key: 'monitoring/execution', label: '执行看板' },
       { key: 'monitoring/uncompleted', label: '未完成指标看板' }
+    ]
+  },
+  {
+    key: 'templates',
+    icon: h(BookOutlined),
+    label: '模板管理',
+    children: [
+      { key: 'templates/management', label: '模板管理' }
     ]
   },
   {
