@@ -43,6 +43,14 @@
     <a-card title="周度总结">
       <template #extra>
         <a-space>
+          <a-button 
+            type="primary" 
+            @click="addNewSummary"
+            :disabled="reviewStatus !== 'draft'"
+          >
+            <PlusOutlined />
+            增加总结
+          </a-button>
           <span>总体自评分：</span>
           <a-input-number
             v-model:value="overallScore"
@@ -203,7 +211,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { ReloadOutlined, CheckOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { ReloadOutlined, CheckOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import dayjs from 'dayjs'
 
 // 页面状态
@@ -392,6 +400,34 @@ const deleteRecord = (record: any) => {
     summaryData.value.splice(index, 1)
     message.success('删除成功')
   }
+}
+
+// 添加新总结
+const addNewSummary = () => {
+  if (reviewStatus.value !== 'draft') {
+    message.warning('总结已提交，无法添加新记录')
+    return
+  }
+  
+  const newId = Math.max(...summaryData.value.map(item => item.id)) + 1
+  const newSummary = {
+    id: newId,
+    serialNumber: summaryData.value.length + 1,
+    weight: 0,
+    project: '',
+    content: '',
+    target: '',
+    standard: '',
+    responsible: '本人',
+    timeRange: [currentWeek.value.startOf('week'), currentWeek.value.endOf('week')],
+    measures: '',
+    result: '',
+    unfinishedReason: '',
+    selfScore: 0
+  }
+  
+  summaryData.value.push(newSummary)
+  message.success('已添加新的总结记录')
 }
 
 // 页面初始化

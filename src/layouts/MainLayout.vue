@@ -57,11 +57,6 @@
         </div>
 
         <div class="header-right">
-          <!-- 通知 -->
-          <a-badge :count="5" class="notification">
-            <a-button type="text" :icon="h(BellOutlined)" />
-          </a-badge>
-
           <!-- 用户菜单 -->
           <a-dropdown>
             <a-space class="user-info">
@@ -110,8 +105,7 @@ import {
   SettingOutlined,
   LogoutOutlined,
   DownOutlined,
-  AuditOutlined,
-  BellOutlined
+  AuditOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()

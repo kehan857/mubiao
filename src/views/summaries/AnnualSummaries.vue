@@ -45,6 +45,14 @@
     <a-card title="年度总结">
       <template #extra>
         <a-space>
+          <a-button 
+            type="primary" 
+            @click="addNewSummary"
+            :disabled="isSubmitted"
+          >
+            <PlusOutlined />
+            增加总结
+          </a-button>
           <span>总体自评分：</span>
           <a-input-number
             v-model:value="overallScore"
@@ -164,7 +172,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { ReloadOutlined, CheckOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { ReloadOutlined, CheckOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue'
 
 // 页面状态
 const loading = ref(false)
@@ -343,6 +351,32 @@ const deleteRecord = (record: any) => {
     summaries.value.splice(index, 1)
     message.success('删除成功')
   }
+}
+
+// 增加新总结
+const addNewSummary = () => {
+  if (isSubmitted.value) {
+    message.warning('总结已提交，无法添加新记录')
+    return
+  }
+  
+  const newId = Math.max(...summaries.value.map(item => item.id)) + 1
+  const newSummary = {
+    id: newId,
+    year: currentYear.value,
+    serialNumber: summaries.value.length + 1,
+    weight: 0,
+    project: '',
+    content: '',
+    target: '',
+    standard: '',
+    responsible: ['本人'],
+    result: '',
+    reason: ''
+  }
+  
+  summaries.value.push(newSummary)
+  message.success('已添加新的总结记录')
 }
 
 // 获取状态类型
