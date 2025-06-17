@@ -1,194 +1,81 @@
 <template>
-  <a-layout style="min-height: 100vh">
+  <a-layout class="main-layout">
     <!-- 侧边栏 -->
-    <a-layout-sider
-      v-model:collapsed="collapsed"
-      :trigger="null"
-      collapsible
-      width="240"
-      theme="light"
-      style="box-shadow: 2px 0 6px rgba(0,21,41,.35)"
+    <a-layout-sider 
+      v-model:collapsed="collapsed" 
+      :trigger="null" 
+      collapsible 
+      width="256"
+      :style="{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0, top: 0, bottom: 0 }"
     >
+      <!-- Logo区域 -->
       <div class="logo">
-        <div class="logo-container">
-          <div class="logo-icon" v-if="!collapsed">
-            🎯
-          </div>
-          <div class="logo-icon-mini" v-else>
-            🎯
-          </div>
-          <span v-if="!collapsed" class="logo-text">目标管理系统</span>
-        </div>
+        <img v-if="!collapsed" src="/logo.svg" alt="目标管理系统" />
+        <img v-else src="/logo-mini.svg" alt="目标管理" />
       </div>
-      
+
+      <!-- 菜单 -->
       <a-menu
+        theme="dark"
+        mode="inline"
         v-model:selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
-        mode="inline"
-        theme="light"
-        :inline-collapsed="collapsed"
+        :items="menuItems"
         @click="handleMenuClick"
-        style="border-right: none;"
-        :forceSubMenuRender="true"
-      >
-        <!-- 首页 -->
-        <a-menu-item key="/dashboard">
-          <template #icon>
-            <DashboardOutlined />
-          </template>
-          首页
-        </a-menu-item>
-        
-        <!-- 目标计划 -->
-        <a-sub-menu key="plans">
-          <template #icon>
-            <AimOutlined />
-          </template>
-          <template #title>目标计划</template>
-          <a-menu-item key="/plans/annual">
-            年度计划
-          </a-menu-item>
-          <a-menu-item key="/plans/quarterly">
-            季度计划
-          </a-menu-item>
-          <a-menu-item key="/plans/monthly">
-            月计划
-          </a-menu-item>
-          <a-menu-item key="/plans/weekly">
-            周计划
-          </a-menu-item>
-        </a-sub-menu>
-        
-        <!-- 工作总结 -->
-        <a-sub-menu key="summaries">
-          <template #icon>
-            <FileTextOutlined />
-          </template>
-          <template #title>工作总结</template>
-          <a-menu-item key="/summaries/annual">
-            年度总结
-          </a-menu-item>
-          <a-menu-item key="/summaries/quarterly">
-            季度总结
-          </a-menu-item>
-          <a-menu-item key="/summaries/monthly">
-            月总结
-          </a-menu-item>
-          <a-menu-item key="/summaries/weekly">
-            周总结
-          </a-menu-item>
-        </a-sub-menu>
-        
-        <!-- 模板管理 -->
-        <a-sub-menu key="templates">
-          <template #icon>
-            <BookOutlined />
-          </template>
-          <template #title>模板管理</template>
-          <a-menu-item key="/templates/management">
-            模板管理
-          </a-menu-item>
-        </a-sub-menu>
-        
-        <!-- 审核管理 -->
-        <a-sub-menu key="audit">
-          <template #icon>
-            <AuditOutlined />
-          </template>
-          <template #title>审核管理</template>
-          <a-menu-item key="/audit/comprehensive">
-            综合审核
-          </a-menu-item>
-          <a-menu-item key="/audit/goal-query">
-            目标导航查询
-          </a-menu-item>
-          <a-menu-item key="/audit/annual">
-            年报审核
-          </a-menu-item>
-          <a-menu-item key="/audit/quarterly">
-            季报审核
-          </a-menu-item>
-          <a-menu-item key="/audit/monthly">
-            月报审核
-          </a-menu-item>
-          <a-menu-item key="/audit/weekly">
-            周报审核
-          </a-menu-item>
-        </a-sub-menu>
-        
-        <!-- 监控看板 -->
-        <a-sub-menu key="monitoring">
-          <template #icon>
-            <BarChartOutlined />
-          </template>
-          <template #title>监控看板</template>
-          <a-menu-item key="/monitoring/execution">
-            执行看板
-          </a-menu-item>
-          <a-menu-item key="/monitoring/uncompleted">
-            未完成指标看板
-          </a-menu-item>
-        </a-sub-menu>
-        
-        <!-- 系统设置 -->
-        <a-sub-menu key="system">
-          <template #icon>
-            <SettingOutlined />
-          </template>
-          <template #title>系统设置</template>
-          <a-menu-item key="/system/organization">
-            组织管理
-          </a-menu-item>
-          <a-menu-item key="/system/permissions">
-            权限配置
-          </a-menu-item>
-        </a-sub-menu>
-      </a-menu>
+      />
     </a-layout-sider>
-    
-    <!-- 主内容区 -->
-    <a-layout>
+
+    <!-- 主体布局 -->
+    <a-layout :style="{ marginLeft: collapsed ? '80px' : '256px' }">
       <!-- 顶部导航 -->
-      <a-layout-header style="background: #fff; padding: 0; box-shadow: 0 1px 4px rgba(0,21,41,.08)">
-        <div class="header-content">
-          <div class="header-left">
-            <a-button
-              type="text"
-              :icon="collapsed ? h(MenuUnfoldOutlined) : h(MenuFoldOutlined)"
-              @click="toggleCollapsed"
-              style="font-size: 16px; width: 64px; height: 64px"
-            />
-          </div>
-          
-          <div class="header-right">
-            <a-dropdown>
-              <template #overlay>
-                <a-menu @click="handleUserMenuClick">
-                  <a-menu-item key="profile">
-                    <UserOutlined />
-                    个人中心
-                  </a-menu-item>
-                  <a-menu-divider />
-                  <a-menu-item key="logout">
-                    <LogoutOutlined />
-                    退出登录
-                  </a-menu-item>
-                </a-menu>
-              </template>
-              <a-button type="text" class="user-info">
-                <a-avatar size="small" style="margin-right: 8px">
-                  <template #icon><UserOutlined /></template>
-                </a-avatar>
-                <span>{{ userInfo.name }}</span>
-                <DownOutlined style="margin-left: 8px" />
-              </a-button>
-            </a-dropdown>
-          </div>
+      <a-layout-header class="header">
+        <div class="header-left">
+          <a-button
+            type="text"
+            :icon="collapsed ? h(MenuUnfoldOutlined) : h(MenuFoldOutlined)"
+            @click="() => (collapsed = !collapsed)"
+            class="trigger"
+          />
+          <a-breadcrumb>
+            <a-breadcrumb-item v-for="item in breadcrumbs" :key="item.path">
+              {{ item.name }}
+            </a-breadcrumb-item>
+          </a-breadcrumb>
+        </div>
+
+        <div class="header-right">
+          <!-- 通知 -->
+          <a-badge :count="5" class="notification">
+            <a-button type="text" :icon="h(BellOutlined)" />
+          </a-badge>
+
+          <!-- 用户菜单 -->
+          <a-dropdown>
+            <a-space class="user-info">
+              <a-avatar size="small">
+                {{ userInfo.name?.charAt(0) || 'U' }}
+              </a-avatar>
+              <span>{{ userInfo.name || '用户' }}</span>
+              <DownOutlined />
+            </a-space>
+            <template #overlay>
+              <a-menu @click="handleUserMenuClick">
+                <a-menu-item key="profile">
+                  <UserOutlined />
+                  个人设置
+                </a-menu-item>
+                <a-menu-item key="logout">
+                  <LogoutOutlined />
+                  退出登录
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
         </div>
       </a-layout-header>
-      
-      <!-- 主内容 -->
-      <a-layout-content style="margin: 16px; padding: 24px; background: #fff; border-radius: 8px">
+
+      <!-- 内容区域 -->
+      <a-layout-content class="content">
         <router-view />
       </a-layout-content>
     </a-layout>
@@ -210,7 +97,8 @@ import {
   SettingOutlined,
   LogoutOutlined,
   DownOutlined,
-  AuditOutlined
+  AuditOutlined,
+  BellOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -286,7 +174,77 @@ const handleUserMenuClick = ({ key }: { key: string }) => {
 }
 
 // 面包屑导航 - 简化实现
-const breadcrumb = ref<string[]>([])
+const breadcrumbs = ref<{ path: string; name: string }[]>([])
+
+// 菜单项
+const menuItems = [
+  {
+    key: '/dashboard',
+    icon: h(DashboardOutlined),
+    label: '首页'
+  },
+  {
+    key: 'plans',
+    icon: h(AimOutlined),
+    label: '目标计划',
+    children: [
+      { key: '/plans/annual', label: '年度计划' },
+      { key: '/plans/quarterly', label: '季度计划' },
+      { key: '/plans/monthly', label: '月计划' },
+      { key: '/plans/weekly', label: '周计划' }
+    ]
+  },
+  {
+    key: 'summaries',
+    icon: h(FileTextOutlined),
+    label: '工作总结',
+    children: [
+      { key: '/summaries/annual', label: '年度总结' },
+      { key: '/summaries/quarterly', label: '季度总结' },
+      { key: '/summaries/monthly', label: '月总结' },
+      { key: '/summaries/weekly', label: '周总结' }
+    ]
+  },
+  {
+    key: 'templates',
+    icon: h(BookOutlined),
+    label: '模板管理',
+    children: [
+      { key: '/templates/management', label: '模板管理' }
+    ]
+  },
+  {
+    key: 'audit',
+    icon: h(AuditOutlined),
+    label: '审核管理',
+    children: [
+      { key: '/audit/comprehensive', label: '综合审核' },
+      { key: '/audit/goal-query', label: '目标导航查询' },
+      { key: '/audit/annual', label: '年报审核' },
+      { key: '/audit/quarterly', label: '季报审核' },
+      { key: '/audit/monthly', label: '月报审核' },
+      { key: '/audit/weekly', label: '周报审核' }
+    ]
+  },
+  {
+    key: 'monitoring',
+    icon: h(BarChartOutlined),
+    label: '监控看板',
+    children: [
+      { key: '/monitoring/execution', label: '执行看板' },
+      { key: '/monitoring/uncompleted', label: '未完成指标看板' }
+    ]
+  },
+  {
+    key: 'system',
+    icon: h(SettingOutlined),
+    label: '系统设置',
+    children: [
+      { key: '/system/organization', label: '组织管理' },
+      { key: '/system/permissions', label: '权限配置' }
+    ]
+  }
+]
 </script>
 
 <style scoped>
@@ -299,46 +257,6 @@ const breadcrumb = ref<string[]>([])
   border-bottom: 1px solid #f0f0f0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-icon {
-  font-size: 28px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.logo-icon-mini {
-  font-size: 24px;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.logo-text {
-  font-weight: 700;
-  font-size: 16px;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.5px;
 }
 
 .header-content {
@@ -371,5 +289,12 @@ const breadcrumb = ref<string[]>([])
 .user-info:hover {
   background-color: #f5f5f5;
   transform: translateY(-1px);
+}
+
+.content {
+  margin: 16px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
 }
 </style> 
