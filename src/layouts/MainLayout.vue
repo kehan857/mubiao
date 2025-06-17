@@ -132,20 +132,20 @@ const toggleCollapsed = () => {
 // 初始化菜单状态
 const initMenuState = () => {
   const path = route.path
-  selectedKeys.value = [path]
+  selectedKeys.value = [path.replace('/', '')]
   
   // 设置默认展开的菜单
-  if (path.startsWith('/plans')) {
+  if (path.includes('plans')) {
     openKeys.value = ['plans']
-  } else if (path.startsWith('/summaries')) {
+  } else if (path.includes('summaries')) {
     openKeys.value = ['summaries']
-  } else if (path.startsWith('/templates')) {
+  } else if (path.includes('templates')) {
     openKeys.value = ['templates']
-  } else if (path.startsWith('/audit')) {
+  } else if (path.includes('audit')) {
     openKeys.value = ['audit']
-  } else if (path.startsWith('/monitoring')) {
+  } else if (path.includes('monitoring')) {
     openKeys.value = ['monitoring']
-  } else if (path.startsWith('/system')) {
+  } else if (path.includes('system')) {
     openKeys.value = ['system']
   } else {
     openKeys.value = []
@@ -188,7 +188,7 @@ const breadcrumbs = ref<{ path: string; name: string }[]>([])
 // 菜单项
 const menuItems = [
   {
-    key: '/dashboard',
+    key: 'dashboard',
     icon: h(DashboardOutlined),
     label: '首页'
   },
@@ -197,10 +197,10 @@ const menuItems = [
     icon: h(AimOutlined),
     label: '目标计划',
     children: [
-      { key: '/plans/annual', label: '年度计划' },
-      { key: '/plans/quarterly', label: '季度计划' },
-      { key: '/plans/monthly', label: '月计划' },
-      { key: '/plans/weekly', label: '周计划' }
+      { key: 'plans/annual', label: '年度计划' },
+      { key: 'plans/quarterly', label: '季度计划' },
+      { key: 'plans/monthly', label: '月计划' },
+      { key: 'plans/weekly', label: '周计划' }
     ]
   },
   {
@@ -208,10 +208,10 @@ const menuItems = [
     icon: h(FileTextOutlined),
     label: '工作总结',
     children: [
-      { key: '/summaries/annual', label: '年度总结' },
-      { key: '/summaries/quarterly', label: '季度总结' },
-      { key: '/summaries/monthly', label: '月总结' },
-      { key: '/summaries/weekly', label: '周总结' }
+      { key: 'summaries/annual', label: '年度总结' },
+      { key: 'summaries/quarterly', label: '季度总结' },
+      { key: 'summaries/monthly', label: '月总结' },
+      { key: 'summaries/weekly', label: '周总结' }
     ]
   },
   {
@@ -219,7 +219,7 @@ const menuItems = [
     icon: h(BookOutlined),
     label: '模板管理',
     children: [
-      { key: '/templates/management', label: '模板管理' }
+      { key: 'templates/management', label: '模板管理' }
     ]
   },
   {
@@ -227,12 +227,12 @@ const menuItems = [
     icon: h(AuditOutlined),
     label: '审核管理',
     children: [
-      { key: '/audit/comprehensive', label: '综合审核' },
-      { key: '/audit/goal-query', label: '目标导航查询' },
-      { key: '/audit/annual', label: '年报审核' },
-      { key: '/audit/quarterly', label: '季报审核' },
-      { key: '/audit/monthly', label: '月报审核' },
-      { key: '/audit/weekly', label: '周报审核' }
+      { key: 'audit/comprehensive', label: '综合审核' },
+      { key: 'audit/goal-query', label: '目标导航查询' },
+      { key: 'audit/annual', label: '年报审核' },
+      { key: 'audit/quarterly', label: '季报审核' },
+      { key: 'audit/monthly', label: '月报审核' },
+      { key: 'audit/weekly', label: '周报审核' }
     ]
   },
   {
@@ -240,8 +240,8 @@ const menuItems = [
     icon: h(BarChartOutlined),
     label: '监控看板',
     children: [
-      { key: '/monitoring/execution', label: '执行看板' },
-      { key: '/monitoring/uncompleted', label: '未完成指标看板' }
+      { key: 'monitoring/execution', label: '执行看板' },
+      { key: 'monitoring/uncompleted', label: '未完成指标看板' }
     ]
   },
   {
@@ -249,8 +249,8 @@ const menuItems = [
     icon: h(SettingOutlined),
     label: '系统设置',
     children: [
-      { key: '/system/organization', label: '组织管理' },
-      { key: '/system/permissions', label: '权限配置' }
+      { key: 'system/organization', label: '组织管理' },
+      { key: 'system/permissions', label: '权限配置' }
     ]
   }
 ]
