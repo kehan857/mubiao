@@ -13,7 +13,9 @@
         left: 0, 
         top: 0, 
         bottom: 0,
-        zIndex: 100
+        zIndex: 100,
+        background: '#fff',
+        boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)'
       }"
     >
       <!-- Logo区域 -->
@@ -26,7 +28,7 @@
 
       <!-- 菜单 -->
       <a-menu
-        theme="dark"
+        theme="light"
         mode="inline"
         v-model:selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
@@ -134,28 +136,29 @@ const toggleCollapsed = () => {
 // 菜单点击处理
 const handleMenuClick = (menuInfo: any) => {
   const { key } = menuInfo
-  if (key && key !== route.path.replace('/', '')) {
+  if (key && key !== route.path.substring(1)) {
     router.push(`/${key}`)
   }
 }
 
 // 监听路由变化
 watch(route, (to) => {
-  const pathWithoutSlash = to.path.replace('/', '') || 'dashboard'
-  selectedKeys.value = [pathWithoutSlash]
+  // 正确设置selectedKeys，去掉开头的斜杠以匹配菜单key
+  const pathKey = to.path.startsWith('/') ? to.path.substring(1) : to.path
+  selectedKeys.value = [pathKey || 'dashboard']
   
   // 设置默认展开的菜单
-  if (pathWithoutSlash.includes('plans')) {
+  if (pathKey.includes('plans/')) {
     openKeys.value = ['plans']
-  } else if (pathWithoutSlash.includes('summaries')) {
+  } else if (pathKey.includes('summaries/')) {
     openKeys.value = ['summaries']
-  } else if (pathWithoutSlash.includes('templates')) {
+  } else if (pathKey.includes('templates/')) {
     openKeys.value = ['templates']
-  } else if (pathWithoutSlash.includes('audit')) {
+  } else if (pathKey.includes('audit/')) {
     openKeys.value = ['audit']
-  } else if (pathWithoutSlash.includes('monitoring')) {
+  } else if (pathKey.includes('monitoring/')) {
     openKeys.value = ['monitoring']
-  } else if (pathWithoutSlash.includes('system')) {
+  } else if (pathKey.includes('system/')) {
     openKeys.value = ['system']
   } else {
     openKeys.value = []
@@ -259,7 +262,7 @@ const menuItems = [
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e8e8e8;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
 }
@@ -277,8 +280,8 @@ const menuItems = [
 }
 
 .side-menu {
-  border-right: 0;
-  background: #001529;
+  border-right: 1px solid #e8e8e8;
+  background: #fff;
 }
 
 .side-menu :deep(.ant-menu-item) {
@@ -287,10 +290,11 @@ const menuItems = [
   line-height: 40px;
   width: calc(100% - 0px);
   overflow: hidden;
+  color: #333;
 }
 
 .side-menu :deep(.ant-menu-submenu) {
-  background: #001529;
+  background: #fff;
 }
 
 .side-menu :deep(.ant-menu-submenu-title) {
@@ -299,13 +303,25 @@ const menuItems = [
   margin: 0;
   width: calc(100% - 0px);
   overflow: hidden;
+  color: #333;
 }
 
 .side-menu :deep(.ant-menu-item-selected) {
-  background-color: #1890ff !important;
+  background-color: #e6f7ff !important;
+  color: #1890ff !important;
 }
 
 .side-menu :deep(.ant-menu-submenu-selected .ant-menu-submenu-title) {
+  color: #1890ff;
+}
+
+.side-menu :deep(.ant-menu-item:hover) {
+  background-color: #f5f5f5;
+  color: #1890ff;
+}
+
+.side-menu :deep(.ant-menu-submenu-title:hover) {
+  background-color: #f5f5f5;
   color: #1890ff;
 }
 

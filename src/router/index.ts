@@ -6,7 +6,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'Layout',
     component: () => import('@/layouts/MainLayout.vue'),
-    redirect: '/dashboard',
+    redirect: { name: 'Dashboard' },
     children: [
       {
         path: 'dashboard',
@@ -135,11 +135,16 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '权限配置', breadcrumb: ['系统设置', '权限配置'] }
       }
     ]
+  },
+  // 处理未匹配的路由
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/'
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.MODE === 'production' ? '/mubiao/' : '/'),
+  history: createWebHistory(import.meta.env?.MODE === 'production' ? '/mubiao/' : '/'),
   routes
 })
 

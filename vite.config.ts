@@ -2,9 +2,9 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [vue()],
-  base: '/mubiao/',
+  base: mode === 'production' ? '/mubiao/' : '/',
   resolve: {
     alias: {
       '@': resolve(process.cwd(), 'src'),
@@ -27,4 +27,4 @@ export default defineConfig({
       },
     },
   },
-}) 
+})) 
