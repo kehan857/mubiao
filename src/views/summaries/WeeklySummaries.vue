@@ -145,6 +145,17 @@
             />
           </template>
 
+          <template v-else-if="column.key === 'isCompleted'">
+            <a-select
+              v-model:value="record.isCompleted"
+              style="width: 120px"
+              @change="() => handleDataChange(record)"
+            >
+              <a-select-option value="true">已完成</a-select-option>
+              <a-select-option value="false">未完成</a-select-option>
+            </a-select>
+          </template>
+
           <template v-else-if="column.key === 'result'">
             <a-textarea
               v-model:value="record.result"
@@ -160,16 +171,6 @@
               :rows="2"
               placeholder="未完成原因"
               @blur="() => handleDataChange(record)"
-            />
-          </template>
-
-          <template v-else-if="column.key === 'selfScore'">
-            <a-input-number
-              v-model:value="record.selfScore"
-              :min="0"
-              :max="100"
-              style="width: 80px"
-              @change="() => handleDataChange(record)"
             />
           </template>
 
@@ -243,9 +244,9 @@ const summaryData = ref([
     responsible: '张三',
     timeRange: [dayjs().startOf('week'), dayjs().endOf('week')],
     measures: '发放调研问卷，组织用户访谈，数据分析',
+    isCompleted: true,
     result: '完成120个用户调研，整理出详细报告，提出5个改进建议',
-    unfinishedReason: '',
-    selfScore: 95
+    unfinishedReason: ''
   },
   {
     id: 2,
@@ -258,9 +259,9 @@ const summaryData = ref([
     responsible: '李四',
     timeRange: [dayjs().startOf('week'), dayjs().endOf('week')],
     measures: '编写代码，单元测试，代码review',
+    isCompleted: true,
     result: '用户管理模块开发完成，单元测试通过率100%，代码review合格',
-    unfinishedReason: '',
-    selfScore: 92
+    unfinishedReason: ''
   },
   {
     id: 3,
@@ -273,9 +274,9 @@ const summaryData = ref([
     responsible: '王五',
     timeRange: [dayjs().startOf('week'), dayjs().endOf('week')],
     measures: '梳理功能点，编写文档，内部review',
+    isCompleted: false,
     result: 'API文档更新完成，用户操作指南编写完成并通过内部审核',
-    unfinishedReason: '',
-    selfScore: 88
+    unfinishedReason: '部分功能文档需要进一步完善'
   }
 ])
 
@@ -328,6 +329,11 @@ const summaryColumns = [
     width: 200
   },
   {
+    title: '是否完成',
+    key: 'isCompleted',
+    width: 120
+  },
+  {
     title: '完成结果',
     key: 'result',
     width: 250
@@ -336,12 +342,6 @@ const summaryColumns = [
     title: '未完成原因',
     key: 'unfinishedReason',
     width: 200
-  },
-  {
-    title: '自评分',
-    key: 'selfScore',
-    width: 100,
-    fixed: 'right'
   },
   {
     title: '操作',
@@ -421,9 +421,9 @@ const addNewSummary = () => {
     responsible: '本人',
     timeRange: [currentWeek.value.startOf('week'), currentWeek.value.endOf('week')],
     measures: '',
+    isCompleted: false,
     result: '',
-    unfinishedReason: '',
-    selfScore: 0
+    unfinishedReason: ''
   }
   
   summaryData.value.push(newSummary)

@@ -112,6 +112,18 @@
             <span>{{ formatResponsible(record.responsible) }}</span>
           </template>
 
+          <template v-else-if="column.key === 'isCompleted'">
+            <a-select
+              v-model:value="record.isCompleted"
+              style="width: 120px"
+              :disabled="isSubmitted"
+              @change="() => handleDataChange(record)"
+            >
+              <a-select-option :value="true">已完成</a-select-option>
+              <a-select-option :value="false">未完成</a-select-option>
+            </a-select>
+          </template>
+
           <template v-else-if="column.key === 'result'">
             <a-textarea
               v-model:value="record.result"
@@ -227,6 +239,7 @@ const summaries = ref([
     target: '完成核心系统数字化改造，效率提升30%',
     standard: '系统上线运行稳定，关键指标达到预期',
     responsible: ['张三'], // 修改为数组格式
+    isCompleted: true, // 添加是否完成字段
     result: '已完成核心系统上线，效率提升32%，超额完成目标',
     reason: ''
   },
@@ -240,6 +253,7 @@ const summaries = ref([
     target: '新增客户400家，营收增长20%',
     standard: '客户数量和营收目标达成率90%以上',
     responsible: ['李四'], // 修改为数组格式
+    isCompleted: false, // 添加是否完成字段
     result: '新增客户350家，营收增长18%',
     reason: '受市场环境影响，客户获取难度增加'
   }
@@ -281,6 +295,11 @@ const summaryColumns = [
   {
     title: '责任人',
     key: 'responsible',
+    width: 120
+  },
+  {
+    title: '是否完成',
+    key: 'isCompleted',
     width: 120
   },
   {
@@ -371,6 +390,7 @@ const addNewSummary = () => {
     target: '',
     standard: '',
     responsible: ['本人'],
+    isCompleted: false,
     result: '',
     reason: ''
   }

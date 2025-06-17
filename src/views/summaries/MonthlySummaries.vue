@@ -124,6 +124,18 @@
             <span>{{ record.measures }}</span>
           </template>
 
+          <template v-else-if="column.key === 'isCompleted'">
+            <a-select
+              v-model:value="record.isCompleted"
+              style="width: 120px"
+              :disabled="isSubmitted"
+              @change="() => handleDataChange(record)"
+            >
+              <a-select-option :value="true">已完成</a-select-option>
+              <a-select-option :value="false">未完成</a-select-option>
+            </a-select>
+          </template>
+
           <template v-else-if="column.key === 'result'">
             <a-textarea
               v-model:value="record.result"
@@ -141,6 +153,17 @@
               :disabled="isSubmitted"
               placeholder="未完成原因"
               @blur="() => handleDataChange(record)"
+            />
+          </template>
+
+          <template v-else-if="column.key === 'selfScore'">
+            <a-input-number
+              v-model:value="record.selfScore"
+              :min="0"
+              :max="100"
+              :disabled="isSubmitted"
+              placeholder="自评分"
+              style="width: 100px"
             />
           </template>
 
@@ -220,52 +243,39 @@ const formatResponsible = (responsible: string[]) => {
   return `${responsible[0]} 等${responsible.length}人`
 }
 
-// 总结数据 - 修改责任人字段为数组格式
+// 总结数据
 const summaryData = ref([
   {
     id: 1,
     serialNumber: 1,
-    weight: 30,
-    project: '产品功能优化',
-    content: '对核心产品进行用户体验优化，提升用户满意度',
-    target: '用户满意度评分提升至4.5分以上',
-    standard: '用户反馈问题减少50%，新功能使用率达到80%',
-    responsible: ['张三'], // 修改为数组格式
-    timeRange: [dayjs().startOf('month'), dayjs().endOf('month')],
-    measures: '收集用户反馈，制定优化方案，分批次发布更新',
-    result: '用户满意度评分达到4.7分，用户反馈问题减少60%，新功能使用率85%',
+    weight: 35,
+    project: '客户服务优化',
+    content: '提升客户服务质量，优化服务流程',
+    target: '客户满意度达到95%以上，投诉率降低50%',
+    standard: '月度客户满意度调研，投诉处理时效达标',
+    responsible: ['张三'],
+    timeRange: [currentMonth.value.startOf('month'), currentMonth.value.endOf('month')],
+    measures: '培训服务团队，优化服务流程，建立快速响应机制',
+    isCompleted: true,
+    result: '客户满意度达到96%，投诉率降低55%，超额完成目标',
     unfinishedReason: '',
-    selfScore: 92
+    selfScore: 95
   },
   {
     id: 2,
     serialNumber: 2,
-    weight: 25,
-    project: '团队建设',
-    content: '加强团队协作能力，提升工作效率',
-    target: '团队协作效率提升20%',
-    standard: '项目交付时间缩短，团队满意度调查80分以上',
-    responsible: ['李四'], // 修改为数组格式
-    timeRange: [dayjs().startOf('month'), dayjs().endOf('month')],
-    measures: '组织团建活动，优化工作流程，定期团队会议',
-    result: '团队协作效率提升25%，项目交付时间缩短15%，团队满意度85分',
-    unfinishedReason: '',
-    selfScore: 88
-  },
-  {
-    id: 3,
-    serialNumber: 3,
-    weight: 20,
-    project: '技术研发',
-    content: '新技术调研和应用，提升技术竞争力',
-    target: '完成2项新技术的调研和demo开发',
-    standard: 'demo功能完整，性能测试通过，文档齐全',
-    responsible: ['王五'], // 修改为数组格式
-    timeRange: [dayjs().startOf('month'), dayjs().endOf('month')],
-    measures: '制定研发计划，分配技术资源，定期review',
-    result: '完成3项新技术调研，2个demo开发完成并通过测试',
-    unfinishedReason: '',
-    selfScore: 95
+    weight: 30,
+    project: '产品功能开发',
+    content: '完成移动端新功能模块开发',
+    target: '按期完成3个新功能模块开发和测试',
+    standard: '功能完整，测试通过，用户体验良好',
+    responsible: ['李四'],
+    timeRange: [currentMonth.value.startOf('month'), currentMonth.value.endOf('month')],
+    measures: '需求分析，设计开发，测试验收',
+    isCompleted: false,
+    result: '完成2个功能模块，第3个模块仍在开发中',
+    unfinishedReason: '第三方接口调试耗时较长，影响开发进度',
+    selfScore: 75
   }
 ])
 
@@ -318,6 +328,11 @@ const summaryColumns = [
     width: 200
   },
   {
+    title: '是否完成',
+    key: 'isCompleted',
+    width: 120
+  },
+  {
     title: '完成结果',
     key: 'result',
     width: 250
@@ -326,6 +341,12 @@ const summaryColumns = [
     title: '未完成原因',
     key: 'unfinishedReason',
     width: 200
+  },
+  {
+    title: '自评分',
+    key: 'selfScore',
+    width: 100,
+    fixed: 'right'
   },
   {
     title: '操作',
@@ -407,6 +428,7 @@ const addNewSummary = () => {
     responsible: ['本人'],
     timeRange: [currentMonth.value.startOf('month'), currentMonth.value.endOf('month')],
     measures: '',
+    isCompleted: false,
     result: '',
     unfinishedReason: '',
     selfScore: 0

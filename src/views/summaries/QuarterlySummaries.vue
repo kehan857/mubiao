@@ -118,6 +118,18 @@
             <span>{{ formatResponsible(record.responsible) }}</span>
           </template>
 
+          <template v-else-if="column.key === 'isCompleted'">
+            <a-select
+              v-model:value="record.isCompleted"
+              style="width: 120px"
+              :disabled="isSubmitted"
+              @change="() => handleDataChange(record)"
+            >
+              <a-select-option :value="true">已完成</a-select-option>
+              <a-select-option :value="false">未完成</a-select-option>
+            </a-select>
+          </template>
+
           <template v-else-if="column.key === 'result'">
             <a-textarea
               v-model:value="record.result"
@@ -222,39 +234,41 @@ const formatResponsible = (responsible: string[]) => {
   return `${responsible[0]} 等${responsible.length}人`
 }
 
-// 总结数据 - 修改责任人字段为数组格式
+// 总结数据
 const summaries = ref([
   {
     id: 1,
-    year: '2024',
-    quarter: 'Q1',
+    year: 2024,
+    quarter: 'Q4',
     serialNumber: 1,
-    weight: 25,
-    project: 'Q1市场拓展',
-    content: '第一季度新市场开拓和客户获取',
-    target: '新增客户100家，营收增长20%',
-    standard: '客户数量和营收目标达成率90%以上',
-    responsible: ['李四'], // 修改为数组格式
-    result: '新增客户95家，营收增长18%',
-    reason: '部分潜在客户决策周期延长'
+    weight: 35,
+    project: 'Q4销售目标达成',
+    content: '完成第四季度销售任务，达成全年销售目标',
+    target: 'Q4销售额达到800万，全年销售额3000万',
+    standard: '销售目标达成率90%以上',
+    responsible: ['张三'],
+    isCompleted: true,
+    result: 'Q4实际销售额850万，全年累计3200万，超额完成目标',
+    reason: ''
   },
   {
     id: 2,
-    year: '2024',
-    quarter: 'Q2',
-    serialNumber: 1,
+    year: 2024,
+    quarter: 'Q4',
+    serialNumber: 2,
     weight: 30,
-    project: 'Q2产品优化',
-    content: '第二季度产品功能优化和用户体验提升',
-    target: '用户满意度提升至90%以上',
-    standard: '用户调研满意度达标',
-    responsible: ['王五'], // 修改为数组格式
-    result: '用户满意度达到92%，超额完成',
-    reason: ''
+    project: '产品优化项目',
+    content: '完成核心产品功能优化和性能提升',
+    target: '产品响应时间减少30%，用户满意度提升到95%',
+    standard: '性能指标达标，用户满意度调研结果达标',
+    responsible: ['李四'],
+    isCompleted: false,
+    result: '响应时间减少25%，用户满意度92%',
+    reason: '部分优化功能需要更多时间测试'
   }
 ])
 
-// 表格列定义
+// 总结表格列定义
 const summaryColumns = [
   {
     title: '序号',
@@ -293,6 +307,11 @@ const summaryColumns = [
     width: 120
   },
   {
+    title: '是否完成',
+    key: 'isCompleted',
+    width: 120
+  },
+  {
     title: '完成结果',
     key: 'result',
     width: 250
@@ -305,7 +324,7 @@ const summaryColumns = [
   {
     title: '操作',
     key: 'actions',
-    width: 120,
+    width: 150,
     fixed: 'right'
   }
 ]
@@ -390,6 +409,7 @@ const addNewSummary = () => {
     target: '',
     standard: '',
     responsible: ['本人'],
+    isCompleted: false,
     result: '',
     reason: ''
   }
