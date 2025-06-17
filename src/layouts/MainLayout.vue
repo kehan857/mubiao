@@ -18,8 +18,10 @@
     >
       <!-- Logo区域 -->
       <div class="logo">
-        <img v-if="!collapsed" src="/logo.svg" alt="目标管理系统" />
-        <img v-else src="/logo-mini.svg" alt="目标管理" />
+        <div class="logo-text">
+          <span v-if="!collapsed">目标管理系统</span>
+          <span v-else>目标</span>
+        </div>
       </div>
 
       <!-- 菜单 -->
@@ -129,46 +131,36 @@ const toggleCollapsed = () => {
   collapsed.value = !collapsed.value
 }
 
-// 初始化菜单状态
-const initMenuState = () => {
-  const path = route.path
-  selectedKeys.value = [path.replace('/', '')]
-  
-  // 设置默认展开的菜单
-  if (path.includes('plans')) {
-    openKeys.value = ['plans']
-  } else if (path.includes('summaries')) {
-    openKeys.value = ['summaries']
-  } else if (path.includes('templates')) {
-    openKeys.value = ['templates']
-  } else if (path.includes('audit')) {
-    openKeys.value = ['audit']
-  } else if (path.includes('monitoring')) {
-    openKeys.value = ['monitoring']
-  } else if (path.includes('system')) {
-    openKeys.value = ['system']
-  } else {
-    openKeys.value = []
+// 菜单点击处理
+const handleMenuClick = (menuInfo: any) => {
+  const { key } = menuInfo
+  if (key && key !== route.path.replace('/', '')) {
+    router.push(`/${key}`)
   }
 }
 
 // 监听路由变化
-watch(
-  () => route.path,
-  () => {
-    initMenuState()
-  },
-  { immediate: true }
-)
-
-// 菜单点击事件
-const handleMenuClick = ({ key }: { key: string }) => {
-  if (key !== route.path) {
-    router.push(key).catch(() => {
-      // 忽略路由重复错误
-    })
+watch(route, (to) => {
+  const pathWithoutSlash = to.path.replace('/', '') || 'dashboard'
+  selectedKeys.value = [pathWithoutSlash]
+  
+  // 设置默认展开的菜单
+  if (pathWithoutSlash.includes('plans')) {
+    openKeys.value = ['plans']
+  } else if (pathWithoutSlash.includes('summaries')) {
+    openKeys.value = ['summaries']
+  } else if (pathWithoutSlash.includes('templates')) {
+    openKeys.value = ['templates']
+  } else if (pathWithoutSlash.includes('audit')) {
+    openKeys.value = ['audit']
+  } else if (pathWithoutSlash.includes('monitoring')) {
+    openKeys.value = ['monitoring']
+  } else if (pathWithoutSlash.includes('system')) {
+    openKeys.value = ['system']
+  } else {
+    openKeys.value = []
   }
-}
+}, { immediate: true })
 
 // 用户菜单点击事件
 const handleUserMenuClick = ({ key }: { key: string }) => {
@@ -270,6 +262,13 @@ const menuItems = [
   border-bottom: 1px solid #f0f0f0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
+}
+
+.logo-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .logo img {
