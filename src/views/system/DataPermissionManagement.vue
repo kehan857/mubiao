@@ -97,13 +97,32 @@
           </template>
           <template v-else-if="column.key === 'permissions'">
             <a-space wrap>
+              <!-- 计划权限 -->
               <a-tag 
-                v-for="permission in record.permissions" 
-                :key="permission"
-                :color="getPermissionColor(permission)"
+                v-for="permission in record.permissions.plans" 
+                :key="'plan-' + permission"
+                color="green"
                 size="small"
               >
-                {{ getPermissionText(permission) }}
+                {{ getPlanPermissionText(permission) }}
+              </a-tag>
+              <!-- 总结权限 -->
+              <a-tag 
+                v-for="permission in record.permissions.summaries" 
+                :key="'summary-' + permission"
+                color="blue"
+                size="small"
+              >
+                {{ getSummaryPermissionText(permission) }}
+              </a-tag>
+              <!-- 操作权限 -->
+              <a-tag 
+                v-for="permission in record.permissions.operations" 
+                :key="'operation-' + permission"
+                color="orange"
+                size="small"
+              >
+                {{ getOperationPermissionText(permission) }}
               </a-tag>
             </a-space>
           </template>
