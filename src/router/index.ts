@@ -133,6 +133,12 @@ const routes: RouteRecordRaw[] = [
         name: 'SystemPermissions',
         component: () => import('@/views/system/PermissionManagement.vue'),
         meta: { title: '权限配置', breadcrumb: ['系统设置', '权限配置'] }
+      },
+      {
+        path: 'system/data-permissions',
+        name: 'SystemDataPermissions',
+        component: () => import('@/views/system/DataPermissionManagement.vue'),
+        meta: { title: '数据权限管理', breadcrumb: ['系统设置', '数据权限管理'] }
       }
     ]
   },

@@ -239,7 +239,8 @@ const menuItems = [
     label: '系统设置',
     children: [
       { key: 'system/organization', label: '组织管理' },
-      { key: 'system/permissions', label: '权限配置' }
+      { key: 'system/permissions', label: '权限配置' },
+      { key: 'system/data-permissions', label: '数据权限管理' }
     ]
   }
 ]

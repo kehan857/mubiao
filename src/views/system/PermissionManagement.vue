@@ -156,6 +156,72 @@
         show-search
       />
     </a-modal>
+
+    <!-- 修改用户角色弹窗 -->
+    <a-modal
+      v-model:open="showEditUserRoleModal"
+      title="修改用户角色"
+      @ok="handleEditUserRole"
+      @cancel="showEditUserRoleModal = false"
+    >
+      <a-form :model="userRoleForm" layout="vertical">
+        <a-form-item label="当前角色">
+          <a-input v-model:value="userRoleForm.currentRole" readonly />
+        </a-form-item>
+        <a-form-item label="新角色">
+          <a-input v-model:value="userRoleForm.newRole" />
+        </a-form-item>
+        <a-form-item label="原因">
+          <a-textarea v-model:value="userRoleForm.reason" placeholder="请输入修改原因" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
+    <!-- 查看用户详情弹窗 -->
+    <a-modal
+      v-model:open="showUserDetailModal"
+      title="用户详情"
+      width="80%"
+      @ok="showUserDetailModal = false"
+      @cancel="showUserDetailModal = false"
+    >
+      <div class="user-detail">
+        <div class="detail-item">
+          <span class="label">姓名:</span>
+          <span class="value">{{ selectedUser.name }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">用户名:</span>
+          <span class="value">{{ selectedUser.username }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">邮箱:</span>
+          <span class="value">{{ selectedUser.email }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">部门:</span>
+          <span class="value">{{ selectedUser.department }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">角色:</span>
+          <span class="value">{{ getRoleText(selectedUser.role) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">权限:</span>
+          <span class="value">
+            <a-space wrap>
+              <a-tag 
+                v-for="permission in getUserPermissions(selectedUser.role)" 
+                :key="permission"
+                :color="getPermissionColor(permission)"
+              >
+                {{ getPermissionText(permission) }}
+              </a-tag>
+            </a-space>
+          </span>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -176,6 +242,9 @@ const showAddRoleModal = ref(false)
 const showUserAssignModal = ref(false)
 const editingRole = ref<any>(null)
 const assignedUsers = ref<string[]>([])
+const showEditUserRoleModal = ref(false)
+const showUserDetailModal = ref(false)
+const selectedUser = ref<any>(null)
 
 // 表单数据
 const roleForm = reactive({
@@ -183,6 +252,13 @@ const roleForm = reactive({
   code: '',
   description: '',
   permissions: []
+})
+
+const userRoleForm = reactive({
+  userId: '',
+  currentRole: '',
+  newRole: '',
+  reason: ''
 })
 
 // 角色数据
@@ -411,12 +487,18 @@ const assignUsers = (record: any) => {
 
 // 修改用户角色
 const editUserRole = (record: any) => {
-  message.info('修改用户角色功能')
+  selectedUser.value = record
+  userRoleForm.userId = record.id
+  userRoleForm.currentRole = record.role
+  userRoleForm.newRole = record.role
+  userRoleForm.reason = ''
+  showEditUserRoleModal.value = true
 }
 
 // 查看用户详情
 const viewUserDetail = (record: any) => {
-  message.info('查看用户详情功能')
+  selectedUser.value = record
+  showUserDetailModal.value = true
 }
 
 // 提交角色表单
@@ -446,6 +528,12 @@ const handleUserAssign = () => {
 // 刷新数据
 const refreshData = () => {
   message.success('数据刷新成功')
+}
+
+// 处理修改用户角色
+const handleEditUserRole = () => {
+  message.success('用户角色修改成功')
+  showEditUserRoleModal.value = false
 }
 </script>
 
@@ -479,5 +567,22 @@ const refreshData = () => {
   margin: 0;
   color: #666;
   font-size: 14px;
+}
+
+.user-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-item {
+  margin-bottom: 16px;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.value {
+  margin-left: 16px;
 }
 </style> 
