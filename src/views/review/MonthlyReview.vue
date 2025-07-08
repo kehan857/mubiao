@@ -293,15 +293,7 @@
               :scroll="{ x: 1500 }"
             >
               <template #bodyCell="{ column, record }">
-                <template v-if="column.key === 'score'">
-                  <a-input-number
-                    v-model:value="record.managerScore"
-                    :min="0"
-                    :max="100"
-                    size="small"
-                    style="width: 80px"
-                  />
-                </template>
+
                 <template v-else-if="column.key === 'feedback'">
                   <a-textarea
                     v-model:value="record.managerFeedback"
@@ -517,11 +509,7 @@ const detailColumns = [
     dataIndex: 'selfScore',
     width: 80
   },
-  {
-    title: '上级评分',
-    key: 'score',
-    width: 100
-  },
+
   {
     title: '上级评语',
     key: 'feedback',
@@ -611,9 +599,8 @@ const reviewDetail = (record: any) => {
   reviewForm.action = 'approve'
   reviewForm.overallFeedback = ''
   
-  // 初始化评分数据
+  // 初始化评语数据
   currentReview.value.details.forEach((detail: any) => {
-    if (!detail.managerScore) detail.managerScore = detail.selfScore
     if (!detail.managerFeedback) detail.managerFeedback = ''
   })
   
@@ -634,15 +621,7 @@ const handleSubmitReview = async () => {
     return
   }
 
-  // 检查是否所有项目都已评分
-  const hasUnscored = currentReview.value.details.some((detail: any) => 
-    detail.managerScore === null || detail.managerScore === undefined
-  )
-  
-  if (hasUnscored && reviewForm.action === 'approve') {
-    message.error('请为所有项目进行评分')
-    return
-  }
+
 
   try {
     // 模拟API调用

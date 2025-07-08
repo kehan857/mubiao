@@ -184,6 +184,7 @@
                   type="text" 
                   size="small" 
                   danger
+                  :disabled="reviewStatus === 'approved'"
                 >
                   <DeleteOutlined />
                   删除
@@ -395,6 +396,11 @@ const handleWeekChange = async () => {
 
 // 删除记录
 const deleteRecord = (record: any) => {
+  if (reviewStatus.value === 'approved') {
+    message.error('审核通过的总结不允许删除')
+    return
+  }
+  
   const index = summaryData.value.findIndex(item => item.id === record.id)
   if (index > -1) {
     summaryData.value.splice(index, 1)

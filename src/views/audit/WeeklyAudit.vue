@@ -10,6 +10,14 @@
       </div>
     </div>
 
+    <!-- 审核类型切换 -->
+    <a-card style="margin-bottom: 16px">
+      <a-radio-group v-model:value="auditType" button-style="solid" @change="handleAuditTypeChange">
+        <a-radio-button value="plan">计划审核</a-radio-button>
+        <a-radio-button value="summary">总结审核</a-radio-button>
+      </a-radio-group>
+    </a-card>
+
     <!-- 筛选条件 -->
     <a-card style="margin-bottom: 16px">
       <a-form layout="inline" :model="filters">
@@ -39,7 +47,7 @@
     </a-card>
 
     <!-- 审核列表 -->
-    <a-card title="周报审核列表">
+    <a-card :title="auditType === 'plan' ? '周计划审核列表' : '周总结审核列表'">
       <template #extra>
         <a-space>
           <a-button @click="batchConfirm" :disabled="selectedRowKeys.length === 0" type="primary">
@@ -91,7 +99,7 @@
     <!-- 审核弹窗 -->
     <a-modal
       v-model:open="showAuditModal"
-      title="审核周报"
+      :title="`审核周${auditType === 'plan' ? '计划' : '总结'}`"
       @ok="handleAuditSubmit"
       @cancel="resetAuditForm"
       width="800px"
@@ -117,7 +125,7 @@
     <!-- 详情查看弹窗 -->
     <a-modal
       v-model:open="showDetailModal"
-      title="周报详情"
+      :title="`周${auditType === 'plan' ? '计划' : '总结'}详情`"
       footer="null"
       width="1000px"
     >
@@ -135,9 +143,9 @@
           </a-descriptions-item>
         </a-descriptions>
         
-        <a-divider>周报内容</a-divider>
+        <a-divider>{{ auditType === 'plan' ? '周计划内容' : '周总结内容' }}</a-divider>
         <div style="background: #f5f5f5; padding: 16px; border-radius: 6px;">
-          {{ currentRecord.content || '暂无周报内容' }}
+          {{ currentRecord.content || `暂无周${auditType === 'plan' ? '计划' : '总结'}内容` }}
         </div>
         
         <a-divider>已有建议</a-divider>
@@ -169,7 +177,7 @@ import {
   CheckOutlined,
   EditOutlined
 } from '@ant-design/icons-vue'
-import DetailedAuditModal from '@/components/DetailedAuditModal.vue'
+import DetailedAuditModal from '../../components/DetailedAuditModal.vue'
 
 // 页面状态
 const loading = ref(false)
@@ -200,8 +208,9 @@ const rowSelection = {
   }
 }
 
-// 审核数据
-const auditData = ref([
+// 所有审核数据（包含计划和总结）
+const allAuditData = ref([
+  // 周计划数据
   {
     id: 1,
     name: '张三',
@@ -211,7 +220,8 @@ const auditData = ref([
     week: '2024年第50周',
     submitTime: '2024-12-13',
     status: 'pending',
-    content: '本周完成了用户界面优化，修复了3个关键bug，参与了需求评审会议',
+    type: 'plan',
+    content: '本周计划：1. 完成用户界面优化模块开发 2. 修复已知的关键bug 3. 参与新功能需求评审会议 4. 编写技术文档',
     suggestions: ''
   },
   {
@@ -223,22 +233,56 @@ const auditData = ref([
     week: '2024年第50周',
     submitTime: '2024-12-14',
     status: 'confirmed',
+    type: 'plan',
+    content: '本周计划：1. 完成用户调研报告撰写 2. 制定下阶段产品发展规划 3. 协调技术和市场部门合作 4. 审核产品原型设计',
+    suggestions: '计划合理，重点关注跨部门协调效果'
+  },
+  // 周总结数据
+  {
+    id: 11,
+    name: '张三',
+    department: '技术部',
+    position: '高级工程师',
+    isManager: false,
+    week: '2024年第49周',
+    submitTime: '2024-12-13',
+    status: 'pending',
+    type: 'summary',
+    content: '本周完成了用户界面优化，修复了3个关键bug，参与了需求评审会议',
+    suggestions: ''
+  },
+  {
+    id: 12,
+    name: '李四',
+    department: '产品部',
+    position: '产品总监',
+    isManager: true,
+    week: '2024年第49周',
+    submitTime: '2024-12-14',
+    status: 'confirmed',
+    type: 'summary',
     content: '产品部本周完成了用户调研报告，制定了下阶段产品规划，协调了跨部门合作',
     suggestions: '继续保持与技术团队的紧密沟通'
   },
   {
-    id: 3,
+    id: 13,
     name: '王五',
     department: '市场部',
     position: '市场专员',
     isManager: false,
-    week: '2024年第50周',
+    week: '2024年第49周',
     submitTime: '2024-12-12',
     status: 'revision',
+    type: 'summary',
     content: '本周进行了客户拜访，整理了竞品分析',
     suggestions: '建议补充具体的数据分析和行动计划'
   }
 ])
+
+// 根据审核类型过滤的数据
+const auditData = computed(() => {
+  return allAuditData.value.filter(item => item.type === auditType.value)
+})
 
 // 表格列定义
 const auditColumns = [
@@ -365,6 +409,16 @@ const resetAuditForm = () => {
 // 搜索
 const handleSearch = () => {
   message.info('搜索功能')
+}
+
+// 处理审核类型切换
+const handleAuditTypeChange = () => {
+  console.log('审核类型切换为:', auditType.value)
+  // 重置选择
+  selectedRowKeys.value = []
+  // 更新分页总数
+  pagination.total = auditData.value.length
+  pagination.current = 1
 }
 
 // 重置筛选

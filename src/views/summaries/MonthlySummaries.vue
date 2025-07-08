@@ -156,23 +156,12 @@
             />
           </template>
 
-          <template v-else-if="column.key === 'selfScore'">
-            <a-input-number
-              v-model:value="record.selfScore"
-              :min="0"
-              :max="100"
-              :disabled="isSubmitted"
-              placeholder="自评分"
-              style="width: 100px"
-            />
-          </template>
-
           <template v-else-if="column.key === 'actions'">
             <a-space>
               <a-button 
                 type="link" 
                 @click="deleteSummary(record)"
-                :disabled="isSubmitted"
+                :disabled="reviewStatus === 'approved'"
               >
                 <DeleteOutlined />
                 删除
@@ -258,8 +247,7 @@ const summaryData = ref([
     measures: '培训服务团队，优化服务流程，建立快速响应机制',
     isCompleted: true,
     result: '客户满意度达到96%，投诉率降低55%，超额完成目标',
-    unfinishedReason: '',
-    selfScore: 95
+    unfinishedReason: ''
   },
   {
     id: 2,
@@ -274,8 +262,7 @@ const summaryData = ref([
     measures: '需求分析，设计开发，测试验收',
     isCompleted: false,
     result: '完成2个功能模块，第3个模块仍在开发中',
-    unfinishedReason: '第三方接口调试耗时较长，影响开发进度',
-    selfScore: 75
+    unfinishedReason: '第三方接口调试耗时较长，影响开发进度'
   }
 ])
 
@@ -343,12 +330,6 @@ const summaryColumns = [
     width: 200
   },
   {
-    title: '自评分',
-    key: 'selfScore',
-    width: 100,
-    fixed: 'right'
-  },
-  {
     title: '操作',
     key: 'actions',
     width: 120,
@@ -402,6 +383,11 @@ const handleMonthChange = async () => {
 
 // 删除总结
 const deleteSummary = (record: any) => {
+  if (reviewStatus.value === 'approved') {
+    message.error('审核通过的总结不允许删除')
+    return
+  }
+  
   const index = summaryData.value.findIndex(item => item.id === record.id)
   if (index > -1) {
     summaryData.value.splice(index, 1)
@@ -430,8 +416,7 @@ const addNewSummary = () => {
     measures: '',
     isCompleted: false,
     result: '',
-    unfinishedReason: '',
-    selfScore: 0
+    unfinishedReason: ''
   }
   
   summaryData.value.push(newSummary)

@@ -448,7 +448,7 @@
           <a-descriptions-item label="创建人">{{ currentTemplate?.creator }}</a-descriptions-item>
           <a-descriptions-item label="创建时间">{{ currentTemplate?.createTime }}</a-descriptions-item>
           <a-descriptions-item label="更新时间">{{ currentTemplate?.updateTime }}</a-descriptions-item>
-          <a-descriptions-item label="使用次数">{{ currentTemplate?.useCount }}</a-descriptions-item>
+
         </a-descriptions>
 
         <a-divider />
@@ -800,7 +800,6 @@ const templates = ref([
     status: 'active',
     description: '公司通用的月度工作计划模板，包含完整的目标设定和执行跟踪字段',
     creator: '张三',
-    useCount: 156,
     updateTime: '2024-01-15',
     associatedOrgs: ['技术部', '产品部', '市场部'],
     fields: [
@@ -819,7 +818,6 @@ const templates = ref([
     status: 'active',
     description: '专为技术部定制的月度计划模板，增加技术评估和风险控制字段',
     creator: '李四',
-    useCount: 89,
     updateTime: '2024-02-10',
     associatedOrgs: ['技术部'],
     fields: [
@@ -838,7 +836,6 @@ const templates = ref([
     status: 'active',
     description: '全公司通用的周报模板，简洁明了的工作汇报格式',
     creator: '王五',
-    useCount: 234,
     updateTime: '2024-01-20',
     associatedOrgs: ['技术部', '产品部', '市场部', '销售部', '人事部'],
     fields: [
@@ -856,7 +853,6 @@ const templates = ref([
     status: 'active',
     description: '销售部专用周报模板，包含客户拜访和业绩统计',
     creator: '赵六',
-    useCount: 67,
     updateTime: '2024-02-05',
     associatedOrgs: ['销售部'],
     fields: [
@@ -874,7 +870,6 @@ const templates = ref([
     status: 'active',
     description: '基于OKR方法论的目标设定模板，适用于季度目标制定',
     creator: '孙七',
-    useCount: 123,
     updateTime: '2024-03-01',
     associatedOrgs: ['技术部', '产品部', '市场部'],
     fields: [
@@ -893,7 +888,6 @@ const templates = ref([
     status: 'active',
     description: '公司年度战略规划专用模板，包含详细的战略分析框架',
     creator: '周八',
-    useCount: 45,
     updateTime: '2024-01-05',
     associatedOrgs: ['公司领导层'],
     fields: [
@@ -912,7 +906,6 @@ const templates = ref([
     status: 'active',
     description: '项目管理专用模板，涵盖项目各阶段的关键要素',
     creator: '吴九',
-    useCount: 78,
     updateTime: '2024-02-20',
     associatedOrgs: ['技术部', '产品部'],
     fields: [
@@ -931,7 +924,6 @@ const templates = ref([
     status: 'active',
     description: '人事部培训计划专用模板，包含培训需求分析和效果评估',
     creator: '郑十',
-    useCount: 56,
     updateTime: '2024-03-10',
     associatedOrgs: ['人事部'],
     fields: [
@@ -950,7 +942,6 @@ const templates = ref([
     status: 'active',
     description: '市场部活动策划专用模板，包含活动全流程管理要素',
     creator: '刘十一',
-    useCount: 34,
     updateTime: '2024-02-25',
     associatedOrgs: ['市场部'],
     fields: [
@@ -969,7 +960,6 @@ const templates = ref([
     status: 'active',
     description: '产品部需求文档标准模板，规范产品需求描述格式',
     creator: '陈十二',
-    useCount: 92,
     updateTime: '2024-03-05',
     associatedOrgs: ['产品部', '技术部'],
     fields: [
@@ -988,7 +978,6 @@ const templates = ref([
     status: 'active',
     description: '简化版日报模板，快速记录每日工作进展',
     creator: '张三',
-    useCount: 189,
     updateTime: '2024-01-25',
     associatedOrgs: ['技术部', '产品部', '市场部'],
     fields: [
@@ -1005,7 +994,6 @@ const templates = ref([
     status: 'draft',
     description: '客户服务部反馈收集模板，用于客户满意度调研',
     creator: '李四',
-    useCount: 23,
     updateTime: '2024-03-15',
     associatedOrgs: ['客户服务部'],
     fields: [
@@ -1052,12 +1040,7 @@ const templateColumns = [
     key: 'creator',
     width: 100
   },
-  {
-    title: '使用次数',
-    dataIndex: 'useCount',
-    key: 'useCount',
-    width: 100
-  },
+
   {
     title: '更新时间',
     dataIndex: 'updateTime',

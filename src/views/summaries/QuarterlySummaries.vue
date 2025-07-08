@@ -160,7 +160,7 @@
                   type="text" 
                   size="small" 
                   danger
-                  :disabled="isSubmitted"
+                  :disabled="reviewStatus === 'approved'"
                 >
                   <DeleteOutlined />
                   删除
@@ -383,6 +383,11 @@ const handleQuarterChange = async () => {
 
 // 删除记录
 const deleteRecord = (record: any) => {
+  if (reviewStatus.value === 'approved') {
+    message.error('审核通过的总结不允许删除')
+    return
+  }
+  
   const index = summaries.value.findIndex(item => item.id === record.id)
   if (index > -1) {
     summaries.value.splice(index, 1)

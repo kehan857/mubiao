@@ -51,7 +51,7 @@
             @change="handleReviewModeChange"
           >
             <a-select-option value="plan">计划审核</a-select-option>
-            <a-select-option value="summary">总结查看</a-select-option>
+            <a-select-option value="summary">总结审核</a-select-option>
             <a-select-option value="compare">计划对比</a-select-option>
           </a-select>
         </a-col>
@@ -137,13 +137,13 @@
       </a-card>
     </div>
 
-    <!-- 总结查看模式 -->
+    <!-- 总结审核模式 -->
     <div v-else-if="reviewMode === 'summary'">
-      <a-card title="总结查看与评论">
+      <a-card title="总结审核">
         <template #extra>
           <a-space>
-            <a-button @click="batchComment" :disabled="selectedRows.length === 0">
-              批量评论
+            <a-button @click="batchApproveSummaries" :disabled="selectedRows.length === 0">
+              批量审批总结
             </a-button>
             <a-button type="primary" @click="exportSummaryResults">
               导出总结
@@ -183,15 +183,15 @@
               <a-textarea
                 v-model:value="record.managerComment"
                 :rows="2"
-                placeholder="请输入评论"
+                placeholder="请输入审核意见"
                 size="small"
                 @change="markAsChanged(record.id)"
               />
             </template>
 
             <template v-else-if="column.key === 'status'">
-              <a-tag :color="getStatusColor(record.approvalStatus)">
-                {{ getStatusText(record.approvalStatus) }}
+              <a-tag :color="getStatusColor(record.summaryStatus || record.approvalStatus)">
+                {{ getStatusText(record.summaryStatus || record.approvalStatus) }}
               </a-tag>
             </template>
 
@@ -200,10 +200,10 @@
                 <a-button 
                   type="primary" 
                   size="small" 
-                  @click="provideFeedback(record)"
-                  v-if="record.approvalStatus === 'pending'"
+                  @click="reviewSummary(record)"
+                  v-if="(record.summaryStatus || record.approvalStatus) === 'pending'"
                 >
-                  详细反馈
+                  审核总结
                 </a-button>
                 <a-button 
                   type="text" 
@@ -304,70 +304,64 @@
           </a-radio-group>
         </a-card>
 
-        <!-- 周报内容 -->
+        <!-- 周报内容表格展示 -->
         <a-row :gutter="16">
           <a-col :span="24">
-            <a-card title="周报内容" size="small">
-              <a-descriptions :column="1" size="small">
+            <a-card title="周报详细内容" size="small">
+              <a-descriptions :column="1" size="small" style="margin-bottom: 16px">
                 <a-descriptions-item label="周期范围">{{ currentReport?.weekRange }}</a-descriptions-item>
                 <a-descriptions-item label="提交时间">{{ currentReport?.submitTime }}</a-descriptions-item>
+                <a-descriptions-item label="本周概述">{{ currentReport?.summary }}</a-descriptions-item>
               </a-descriptions>
               
-              <a-divider />
-              
-              <div class="report-section">
-                <h4>本周概述</h4>
-                <p>{{ currentReport?.summary }}</p>
-              </div>
-
-              <div class="report-section">
-                <h4>主要成果</h4>
-                <div v-for="(achievement, index) in currentReport?.achievements" :key="index" class="achievement-item">
-                  <a-tag color="green" style="margin-bottom: 8px">成果{{ index + 1 }}</a-tag>
-                  <p>{{ achievement.content }}</p>
-                  <div class="feedback-section">
+              <!-- 周报工作明细表格 -->
+              <a-table
+                :dataSource="currentReport?.weeklyDetails || []"
+                :columns="weeklyDetailColumns"
+                :pagination="false"
+                size="small"
+                :scroll="{ x: 1600 }"
+                style="margin-bottom: 16px"
+              >
+                <template #bodyCell="{ column, record, index }">
+                  <template v-if="column.key === 'serialNumber'">
+                    {{ index + 1 }}
+                  </template>
+                  <template v-else-if="column.key === 'weight'">
+                    {{ record.weight }}%
+                  </template>
+                  <template v-else-if="column.key === 'isCompleted'">
+                    <a-tag :color="record.isCompleted ? 'green' : 'orange'">
+                      {{ record.isCompleted ? '已完成' : '未完成' }}
+                    </a-tag>
+                  </template>
+                  <template v-else-if="column.key === 'managerFeedback'">
                     <a-textarea
-                      v-model:value="achievement.managerFeedback"
+                      v-model:value="record.managerFeedback"
                       :rows="2"
-                      :placeholder="`对成果${index + 1}的反馈`"
-                      size="small"
-                      style="margin-bottom: 8px"
-                    />
-                    <a-rate v-model:value="achievement.managerRating" :count="5" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="report-section">
-                <h4>遇到的问题</h4>
-                <div v-for="(issue, index) in currentReport?.issues" :key="index" class="issue-item">
-                  <a-tag color="orange" style="margin-bottom: 8px">问题{{ index + 1 }}</a-tag>
-                  <p>{{ issue.content }}</p>
-                  <div class="feedback-section">
-                    <a-textarea
-                      v-model:value="issue.managerGuidance"
-                      :rows="2"
-                      :placeholder="`对问题${index + 1}的指导建议`"
+                      placeholder="请输入评语"
                       size="small"
                     />
-                  </div>
-                </div>
-              </div>
+                  </template>
+                  
+                </template>
+              </a-table>
 
-              <div class="report-section">
-                <h4>下周计划</h4>
-                <div v-for="(plan, index) in currentReport?.nextWeekPlans" :key="index" class="plan-item">
-                  <a-tag color="blue" style="margin-bottom: 8px">计划{{ index + 1 }}</a-tag>
-                  <p>{{ plan.content }}</p>
-                  <div class="feedback-section">
-                    <a-textarea
-                      v-model:value="plan.managerSuggestion"
-                      :rows="2"
-                      :placeholder="`对计划${index + 1}的建议`"
-                      size="small"
-                    />
-                  </div>
-                </div>
+              <!-- 工作总结 -->
+              <a-divider>工作总结</a-divider>
+              <div class="summary-content">
+                <div><strong>主要成果：</strong></div>
+                <ul>
+                  <li v-for="(achievement, index) in currentReport?.achievements" :key="index">
+                    {{ achievement.content }}
+                  </li>
+                </ul>
+                
+                <div style="margin-top: 12px"><strong>遇到问题：</strong></div>
+                <p>{{ currentReport?.issues || '无' }}</p>
+                
+                <div style="margin-top: 12px"><strong>下周计划：</strong></div>
+                <p>{{ currentReport?.nextWeekPlan || '无' }}</p>
               </div>
             </a-card>
           </a-col>
@@ -451,6 +445,7 @@ const reports = ref([
     submitTime: '2024-01-21 18:30:00',
     approvalStatus: 'pending',
     planStatus: 'approved',
+    summaryStatus: 'pending',
     plannedWork: '1. 完成用户界面优化\n2. 修复重要bug\n3. 参与需求评审',
     completedWork: '1. 已完成登录页面UI重构\n2. 修复了5个关键问题\n3. 参与了新功能需求评审',
     nextWeekPlan: '1. 优化商品详情页面性能\n2. 参与新版本需求评审',
@@ -480,6 +475,56 @@ const reports = ref([
         content: '参与新版本需求评审会议',
         managerSuggestion: ''
       }
+    ],
+    weeklyDetails: [
+      {
+        id: 1,
+        weight: 40,
+        project: '用户界面优化',
+        content: '登录页面UI重构',
+        target: '提升用户体验，优化界面布局',
+        standard: '用户满意度达到90%以上',
+        responsible: '张三',
+        timeRange: '2024-01-15 ~ 2024-01-18',
+        measures: '使用新的UI框架，优化交互逻辑',
+        isCompleted: true,
+        result: '已完成登录页面重构，用户反馈良好',
+        unfinishedReason: '',
+        managerFeedback: '',
+        managerRating: 0
+      },
+      {
+        id: 2,
+        weight: 35,
+        project: 'Bug修复',
+        content: '关键问题修复',
+        target: '修复5个关键bug',
+        standard: '所有bug均需通过测试',
+        responsible: '张三',
+        timeRange: '2024-01-16 ~ 2024-01-19',
+        measures: '代码review、单元测试',
+        isCompleted: true,
+        result: '修复了5个关键问题，通过测试验证',
+        unfinishedReason: '',
+        managerFeedback: '',
+        managerRating: 0
+      },
+      {
+        id: 3,
+        weight: 25,
+        project: '需求评审',
+        content: '新功能需求评审',
+        target: '参与需求评审，提供技术建议',
+        standard: '积极参与，提出有价值建议',
+        responsible: '张三',
+        timeRange: '2024-01-20 ~ 2024-01-21',
+        measures: '准备技术方案，参与讨论',
+        isCompleted: true,
+        result: '参与了新功能需求评审，提出多项技术建议',
+        unfinishedReason: '',
+        managerFeedback: '',
+        managerRating: 0
+      }
     ]
   },
   {
@@ -490,6 +535,7 @@ const reports = ref([
     submitTime: '2024-01-21 17:45:00',
     approvalStatus: 'approved',
     planStatus: 'approved',
+    summaryStatus: 'approved',
     plannedWork: '1. 后端服务优化\n2. 数据库性能提升\n3. 缓存机制开发',
     completedWork: '1. 数据库查询效率提升40%\n2. 新增Redis缓存机制\n3. 完成API接口优化',
     nextWeekPlan: '1. 完善监控系统\n2. 增加报警机制',
@@ -510,6 +556,56 @@ const reports = ref([
         content: '完善监控系统',
         managerSuggestion: '建议重点关注报警机制'
       }
+    ],
+    weeklyDetails: [
+      {
+        id: 1,
+        weight: 40,
+        project: '后端服务优化',
+        content: 'API接口性能优化',
+        target: '接口响应时间降低30%',
+        standard: '通过性能测试验证',
+        responsible: '李四',
+        timeRange: '2024-01-15 ~ 2024-01-18',
+        measures: '代码优化、缓存策略',
+        isCompleted: true,
+        result: 'API接口响应时间降低35%，效果显著',
+        unfinishedReason: '',
+        managerFeedback: '',
+        managerRating: 0
+      },
+      {
+        id: 2,
+        weight: 35,
+        project: '数据库性能提升',
+        content: '查询优化和索引调整',
+        target: '数据库查询效率提升40%',
+        standard: '通过数据库性能监控验证',
+        responsible: '李四',
+        timeRange: '2024-01-16 ~ 2024-01-19',
+        measures: 'SQL优化、索引重建',
+        isCompleted: true,
+        result: '数据库查询效率提升40%，达到目标',
+        unfinishedReason: '',
+        managerFeedback: '',
+        managerRating: 0
+      },
+      {
+        id: 3,
+        weight: 25,
+        project: '缓存机制开发',
+        content: 'Redis缓存系统搭建',
+        target: '建立完整的缓存体系',
+        standard: '缓存命中率达到80%以上',
+        responsible: '李四',
+        timeRange: '2024-01-18 ~ 2024-01-21',
+        measures: 'Redis部署、缓存策略设计',
+        isCompleted: true,
+        result: '新增Redis缓存机制，缓存命中率85%',
+        unfinishedReason: '',
+        managerFeedback: '',
+        managerRating: 0
+      }
     ]
   },
   {
@@ -519,7 +615,8 @@ const reports = ref([
     weekRange: '2024年第4周(1/22-1/28)',
     submitTime: '2024-01-28 19:00:00',
     approvalStatus: 'pending',
-    planStatus: 'pending',
+    planStatus: 'rejected',
+    summaryStatus: 'pending',
     plannedWork: '1. 前端组件开发\n2. 单元测试编写\n3. 文档更新',
     completedWork: '1. 完成3个前端组件\n2. 编写了部分单元测试\n3. 文档更新进度50%',
     nextWeekPlan: '1. 继续完善测试覆盖率\n2. 完成文档编写',
@@ -539,6 +636,137 @@ const reports = ref([
       {
         content: '提升测试覆盖率到80%',
         managerSuggestion: ''
+      }
+    ],
+    weeklyDetails: [
+      {
+        id: 1,
+        weight: 50,
+        project: '前端组件开发',
+        content: '通用组件库开发',
+        target: '完成5个通用组件',
+        standard: '组件功能完整，代码规范',
+        responsible: '王五',
+        timeRange: '2024-01-22 ~ 2024-01-26',
+        measures: '组件设计、编码实现',
+        isCompleted: false,
+        result: '完成3个前端组件，剩余2个进行中',
+        unfinishedReason: '第三方依赖升级耗时，影响开发进度',
+        managerFeedback: '',
+        managerRating: 0
+      },
+      {
+        id: 2,
+        weight: 30,
+        project: '单元测试编写',
+        content: '组件单元测试',
+        target: '测试覆盖率达到80%',
+        standard: '所有核心功能有测试覆盖',
+        responsible: '王五',
+        timeRange: '2024-01-24 ~ 2024-01-28',
+        measures: 'Jest测试框架，编写测试用例',
+        isCompleted: false,
+        result: '编写了部分单元测试，覆盖率60%',
+        unfinishedReason: '测试环境不稳定，影响测试进度',
+        managerFeedback: '',
+        managerRating: 0
+      },
+      {
+        id: 3,
+        weight: 20,
+        project: '文档更新',
+        content: '组件使用文档',
+        target: '完成所有组件的使用文档',
+        standard: '文档清晰详细，易于理解',
+        responsible: '王五',
+        timeRange: '2024-01-26 ~ 2024-01-28',
+        measures: '编写使用示例，整理API文档',
+        isCompleted: false,
+        result: '文档更新进度50%，基本框架已完成',
+        unfinishedReason: '组件开发优先级较高，文档编写时间有限',
+        managerFeedback: '',
+        managerRating: 0
+      }
+    ]
+  },
+  {
+    id: 4,
+    employeeId: 4,
+    employeeName: '赵六',
+    weekRange: '2024年第4周(1/22-1/28)', 
+    submitTime: '2024-01-28 16:20:00',
+    approvalStatus: 'pending',
+    planStatus: 'approved',
+    summaryStatus: 'rejected',
+    plannedWork: '1. 项目管理优化\n2. 团队协作改进\n3. 流程文档梳理',
+    completedWork: '1. 完成项目管理流程调整\n2. 举办团队建设活动\n3. 整理部分流程文档',
+    nextWeekPlan: '1. 完善流程文档\n2. 推进新流程落地',
+    issues: '部分团队成员对新流程适应较慢',
+    workHours: 45,
+    completionRate: 85,
+    managerComment: '总结内容不够详细，需要补充具体成果',
+    summary: '本周主要做了项目管理流程调整，团队协作有所改善，但文档工作需要加快。',
+    achievements: [
+      {
+        content: '完成项目管理流程调整',
+        managerFeedback: '流程改进效果良好',
+        managerRating: 4
+      }
+    ],
+    nextWeekPlans: [
+      {
+        content: '推进新流程在团队中的落地',
+        managerSuggestion: '建议制定详细的实施计划'
+      }
+    ],
+    weeklyDetails: [
+      {
+        id: 1,
+        weight: 40,
+        project: '项目管理优化',
+        content: '优化项目管理流程',
+        target: '提升项目执行效率20%',
+        standard: '流程执行顺畅，团队满意度提升',
+        responsible: '赵六',
+        timeRange: '2024-01-22 ~ 2024-01-25',
+        measures: '流程梳理、工具优化',
+        isCompleted: true,
+        result: '完成流程调整，团队反馈良好',
+        unfinishedReason: '',
+        managerFeedback: '',
+        managerRating: 0
+      },
+      {
+        id: 2,
+        weight: 35,
+        project: '团队协作改进',
+        content: '提升团队协作效率',
+        target: '团队协作满意度达到90%',
+        standard: '团队沟通顺畅，协作高效',
+        responsible: '赵六',
+        timeRange: '2024-01-23 ~ 2024-01-26',
+        measures: '团队建设活动、沟通机制优化',
+        isCompleted: true,
+        result: '举办团队建设活动，协作效率提升',
+        unfinishedReason: '',
+        managerFeedback: '',
+        managerRating: 0
+      },
+      {
+        id: 3,
+        weight: 25,
+        project: '流程文档梳理',
+        content: '整理和完善流程文档',
+        target: '完成所有核心流程文档',
+        standard: '文档完整、清晰、易懂',
+        responsible: '赵六',
+        timeRange: '2024-01-24 ~ 2024-01-28',
+        measures: '文档整理、内容优化',
+        isCompleted: false,
+        result: '完成70%的文档整理工作',
+        unfinishedReason: '时间安排不合理，需要更多时间完善',
+        managerFeedback: '',
+        managerRating: 0
       }
     ]
   }
@@ -576,6 +804,180 @@ const reportColumns = [
     key: 'actions',
     width: 150
   }
+]
+
+// 计划审核表格列定义
+const planColumns = [
+  {
+    title: '员工',
+    key: 'employee',
+    width: 120
+  },
+  {
+    title: '周期',
+    key: 'weekRange',
+    width: 150
+  },
+  {
+    title: '计划状态',
+    key: 'planStatus',
+    width: 100
+  },
+  {
+    title: '计划工作',
+    key: 'planWork',
+    width: 250
+  },
+  {
+    title: '提交时间',
+    dataIndex: 'submitTime',
+    width: 150
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 200
+  }
+]
+
+// 总结审核表格列定义
+const summaryColumns = [
+  {
+    title: '员工',
+    key: 'employee',
+    width: 120
+  },
+  {
+    title: '周期',
+    key: 'weekRange',
+    width: 150
+  },
+  {
+    title: '总结状态',
+    key: 'status',
+    width: 100
+  },
+  {
+    title: '已完成工作',
+    key: 'completedWork',
+    width: 200
+  },
+  {
+    title: '完成度',
+    dataIndex: 'completionRate',
+    width: 80,
+    customRender: ({ text }: any) => `${text || 0}%`
+  },
+  {
+    title: '管理者审核意见',
+    key: 'comment',
+    width: 200
+  },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 200
+  }
+]
+
+// 计划对比表格列定义
+const compareColumns = [
+  {
+    title: '员工',
+    key: 'employee',
+    width: 120
+  },
+  {
+    title: '周期',
+    key: 'weekRange',
+    width: 150
+  },
+  {
+    title: '计划内容',
+    key: 'planContent',
+    width: 300
+  },
+  {
+    title: '实际完成',
+    key: 'actualContent',
+    width: 300
+  },
+  {
+    title: '对比分析',
+    key: 'comparison',
+    width: 200
+  }
+]
+
+// 周报详细内容表格列定义
+const weeklyDetailColumns = [
+  {
+    title: '序号',
+    key: 'serialNumber',
+    width: 60,
+    fixed: 'left'
+  },
+  {
+    title: '权重',
+    key: 'weight',
+    width: 80
+  },
+  {
+    title: '项目',
+    dataIndex: 'project',
+    width: 120
+  },
+  {
+    title: '内容',
+    dataIndex: 'content',
+    width: 200
+  },
+  {
+    title: '目标',
+    dataIndex: 'target',
+    width: 150
+  },
+  {
+    title: '考核标准',
+    dataIndex: 'standard',
+    width: 150
+  },
+  {
+    title: '责任人',
+    dataIndex: 'responsible',
+    width: 100
+  },
+  {
+    title: '计划完成时间',
+    dataIndex: 'timeRange',
+    width: 150
+  },
+  {
+    title: '实施措施',
+    dataIndex: 'measures',
+    width: 150
+  },
+  {
+    title: '完成状态',
+    key: 'isCompleted',
+    width: 100
+  },
+  {
+    title: '完成结果',
+    dataIndex: 'result',
+    width: 200
+  },
+  {
+    title: '未完成原因',
+    dataIndex: 'unfinishedReason',
+    width: 150
+  },
+  {
+    title: '管理者评语',
+    key: 'managerFeedback',
+    width: 200
+  },
+
 ]
 
 // 分页配置
@@ -723,9 +1125,9 @@ const exportPlanResults = () => {
   message.info('导出计划结果功能开发中...')
 }
 
-// 批量评论
-const batchComment = () => {
-  message.info('批量评论功能开发中...')
+// 批量审批总结
+const batchApproveSummaries = () => {
+  message.info('批量审批总结功能开发中...')
 }
 
 // 导出总结结果
@@ -751,8 +1153,8 @@ const viewPlanDetail = (record: any) => {
   showReviewModal.value = true
 }
 
-// 提供反馈
-const provideFeedback = (record: any) => {
+// 审核总结
+const reviewSummary = (record: any) => {
   currentReport.value = { ...record }
   reviewForm.action = 'approve'
   reviewForm.overallRating = 4
@@ -762,16 +1164,16 @@ const provideFeedback = (record: any) => {
   showReviewModal.value = true
 }
 
-// 保存评论
-const saveComment = (record: any) => {
-  message.info('保存评论功能开发中...')
-}
-
 // 查看总结详情
 const viewSummaryDetail = (record: any) => {
   currentReport.value = { ...record }
   reviewForm.action = 'view'
   showReviewModal.value = true
+}
+
+// 保存评论
+const saveComment = (record: any) => {
+  message.info('保存评论功能开发中...')
 }
 
 // 标记为已更改

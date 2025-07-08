@@ -58,39 +58,51 @@
       <!-- 报告内容 -->
       <a-card :title="getContentTitle()" style="margin-bottom: 16px">
         <div class="report-content">
-          <!-- 工作目标或总结 -->
-          <div class="content-section">
-            <h4>{{ contentType === 'plan' ? '工作目标' : '工作完成情况' }}</h4>
+          <!-- 工作概述 -->
+          <div class="content-section" style="margin-bottom: 16px">
+            <h4>{{ contentType === 'plan' ? '工作目标概述' : '工作完成概述' }}</h4>
             <div class="content-text">
               {{ reportData.content || `暂无${contentType === 'plan' ? '计划' : '总结'}内容` }}
             </div>
           </div>
 
-          <!-- 具体目标列表 -->
-          <div class="content-section" v-if="reportData.goals && reportData.goals.length > 0">
-            <h4>{{ contentType === 'plan' ? '具体目标' : '目标完成情况' }}</h4>
-            <div class="goals-list">
-              <div 
-                v-for="(goal, index) in reportData.goals" 
-                :key="index"
-                class="goal-item"
-              >
-                <div class="goal-header">
-                  <span class="goal-title">{{ goal.title }}</span>
-                  <a-tag 
-                    v-if="contentType === 'summary' && goal.progress !== undefined"
-                    :color="getProgressColor(goal.progress)"
-                  >
-                    完成度: {{ goal.progress }}%
+          <!-- 详细内容表格 -->
+          <div class="content-section">
+            <h4>{{ contentType === 'plan' ? '具体计划明细' : '完成情况明细' }}</h4>
+            <a-table
+              :dataSource="getTableData()"
+              :columns="getTableColumns()"
+              :pagination="false"
+              size="small"
+              :scroll="{ x: 1600 }"
+              style="margin-bottom: 16px"
+            >
+              <template #bodyCell="{ column, record, index }">
+                <template v-if="column.key === 'serialNumber'">
+                  {{ index + 1 }}
+                </template>
+                <template v-else-if="column.key === 'weight'">
+                  {{ record.weight }}%
+                </template>
+                <template v-else-if="column.key === 'isCompleted'">
+                  <a-tag :color="record.isCompleted ? 'green' : 'orange'">
+                    {{ record.isCompleted ? '已完成' : '未完成' }}
                   </a-tag>
-                </div>
-                <div class="goal-description">{{ goal.description }}</div>
-                <div v-if="goal.metrics" class="goal-metrics">
-                  <span class="metrics-label">关键指标：</span>
-                  <span class="metrics-value">{{ goal.metrics }}</span>
-                </div>
-              </div>
-            </div>
+                </template>
+                <template v-else-if="column.key === 'progress'">
+                  <a-progress :percent="record.progress || 0" size="small" />
+                </template>
+                <template v-else-if="column.key === 'auditFeedback'">
+                  <a-textarea
+                    v-model:value="record.auditFeedback"
+                    :rows="2"
+                    placeholder="请输入审核意见"
+                    size="small"
+                  />
+                </template>
+
+              </template>
+            </a-table>
           </div>
 
           <!-- 自评部分（仅总结类型） -->
@@ -340,6 +352,128 @@ const getAuditResultText = (result: string) => {
     modified: '修改后通过'
   }
   return textMap[result] || result
+}
+
+// 获取表格数据
+const getTableData = () => {
+  // 优先使用详细数据，如果没有则从goals转换
+  if (props.reportData?.details && props.reportData.details.length > 0) {
+    return props.reportData.details
+  }
+  
+  if (props.reportData?.goals && props.reportData.goals.length > 0) {
+    return props.reportData.goals.map((goal: any, index: number) => ({
+      id: index + 1,
+      weight: goal.weight || 0,
+      project: goal.title || '',
+      content: goal.description || '',
+      target: goal.metrics || '',
+      standard: goal.criteria || '',
+      responsible: props.reportData?.name || '',
+      timeRange: goal.timeRange || '',
+      measures: goal.measures || '',
+      isCompleted: goal.progress >= 100 || goal.isCompleted || false,
+      result: goal.result || '',
+      unfinishedReason: goal.unfinishedReason || '',
+      progress: goal.progress || 0,
+      auditFeedback: goal.auditFeedback || '',
+      auditRating: goal.auditRating || 0
+    }))
+  }
+  
+  return []
+}
+
+// 获取表格列定义
+const getTableColumns = () => {
+  const baseColumns = [
+    {
+      title: '序号',
+      key: 'serialNumber',
+      width: 60,
+      fixed: 'left'
+    },
+    {
+      title: '权重',
+      key: 'weight',
+      width: 80
+    },
+    {
+      title: '项目',
+      dataIndex: 'project',
+      width: 120
+    },
+    {
+      title: '内容',
+      dataIndex: 'content',
+      width: 200
+    },
+    {
+      title: '目标',
+      dataIndex: 'target',
+      width: 150
+    },
+    {
+      title: '考核标准',
+      dataIndex: 'standard',
+      width: 150
+    },
+    {
+      title: '责任人',
+      dataIndex: 'responsible',
+      width: 100
+    },
+    {
+      title: '时间',
+      dataIndex: 'timeRange',
+      width: 150
+    },
+    {
+      title: '措施',
+      dataIndex: 'measures',
+      width: 150
+    }
+  ]
+
+  if (props.contentType === 'summary') {
+    // 总结模式下的额外列
+    baseColumns.push(
+      {
+        title: '完成状态',
+        key: 'isCompleted',
+        width: 100
+      },
+      {
+        title: '完成结果',
+        dataIndex: 'result',
+        width: 200
+      },
+      {
+        title: '未完成原因',
+        dataIndex: 'unfinishedReason',
+        width: 150
+      },
+      {
+        title: '进度',
+        key: 'progress',
+        width: 120
+      }
+    )
+  }
+
+  // 如果允许审核，添加审核列
+  if (props.canAudit && showAuditForm.value) {
+    baseColumns.push(
+      {
+        title: '审核意见',
+        key: 'auditFeedback',
+        width: 200,
+        fixed: 'right'
+      }
+    )
+  }
+
+  return baseColumns
 }
 
 // 开始审核

@@ -83,10 +83,7 @@
                 <span class="label">更新时间：</span>
                 <span>{{ template.updateTime }}</span>
               </div>
-              <div class="meta-item">
-                <span class="label">使用次数：</span>
-                <span>{{ template.usageCount }}次</span>
-              </div>
+
             </div>
 
             <div class="template-preview">
@@ -251,7 +248,6 @@ const templates = ref([
     department: '',
     description: '适用于日常工作汇报，包含今日完成、遇到问题、明日计划等基础字段',
     updateTime: '2024-01-15',
-    usageCount: 156,
     fields: [
       { name: 'date', label: '日期', type: 'date', placeholder: '选择日期', required: true },
       { name: 'completed', label: '今日完成', type: 'textarea', placeholder: '请详细描述今日完成的工作内容', required: true },
@@ -267,7 +263,6 @@ const templates = ref([
     department: '技术部',
     description: '专为技术人员设计，包含代码提交、bug修复、技术方案等专业字段',
     updateTime: '2024-01-10',
-    usageCount: 89,
     fields: [
       { name: 'date', label: '日期', type: 'date', placeholder: '选择日期', required: true },
       { name: 'codeCommits', label: '代码提交', type: 'textarea', placeholder: '今日代码提交记录', required: true },
@@ -284,7 +279,6 @@ const templates = ref([
     department: '',
     description: '用于周度工作总结，包含本周工作概述、完成情况、下周计划等',
     updateTime: '2024-01-12',
-    usageCount: 234,
     fields: [
       { name: 'weekRange', label: '周期范围', type: 'input', placeholder: '如：2024年第3周(1月15日-1月21日)', required: true },
       { name: 'summary', label: '本周概述', type: 'textarea', placeholder: '本周工作整体概述', required: true },
@@ -301,7 +295,6 @@ const templates = ref([
     department: '',
     description: '月度工作计划制定模板，包含目标设定、实施措施、考核标准等',
     updateTime: '2024-01-08',
-    usageCount: 167,
     fields: [
       { name: 'month', label: '月份', type: 'input', placeholder: '如：2024年1月', required: true },
       { name: 'project', label: '项目名称', type: 'input', placeholder: '项目或工作内容名称', required: true },
